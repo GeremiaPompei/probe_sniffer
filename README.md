@@ -2,7 +2,7 @@
 
 *REMEMBER*: disassociate connected wifi before running test with monitor mode.
 
-## Shell
+## tcpdump
 
 Using terminal tool called **tcpdump** in *sudo* mode.
 ```
@@ -16,37 +16,31 @@ sudo tcpdump -Ini {NET_INTERFACE_NAME} -e -s 256 type mgt subtype probe-req -w {
 ```
 There is a script to do this that can be run using the commands:
 ```
-./sniff.sh
+./tcpdump_sniff.sh
 ```
 to list local interface that can be used to sniff
 ```
-./sniff.sh NET_INTERFACE_NAME
+./tcpdump_sniff.sh NET_INTERFACE_NAME
 ```
 to sniff in monitor mode filtering only the probe requests
 ```
-./sniff.sh NET_INTERFACE_NAME FILENAME.pcapng
+./tcpdump_sniff.sh NET_INTERFACE_NAME FILENAME.pcapng
 ```
 to sniff in monitor mode filtering only the probe requests and save results in FILENAME.pcapng
 
-## Python script
+## scapy
+Scapy is a library used to debug networks. This provides many ways to analyse packages from inside and outside a target network. Here is implemented a script in python to filter packages related to probe requests.
+
 To install packages
 ```
 pip install -r requirements.txt
 ```
-Commands could be:
+Commands are:
 ```
-python sniff.py
+python scapy_sniff.py
 ```
 to list local interface that can be used to sniff
+``` 
+python scapy_sniff.py NET_INTERFACE_NAME
 ```
-sudo python sniff.py NET_INTERFACE_NAME
-```
-to sniff in promiscuous mode
-```
-sudo python sniff.py NET_INTERFACE_NAME monitor
-```
-to sniff in monitor mode
-```
-sudo python sniff.py NET_INTERFACE_NAME probe
-```
-to sniff in monitor mode filtering only the probe requests.
+to sniff probe requests. Remember to enable the monitor mode on selected NET_INTERFACE_NAME.
