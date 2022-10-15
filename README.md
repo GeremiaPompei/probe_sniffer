@@ -1,6 +1,11 @@
 # Probe request sniffing
 
 *REMEMBER*: disassociate connected wifi before running test with monitor mode.
+For mac OS commands to enable it are:
+```
+airport -z                              # to disconnect from current wifi connections
+airport NET_INTERFACE_NAME sniff 11     # to enable the monitor mode
+```
 
 ## tcpdump
 
