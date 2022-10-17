@@ -1,21 +1,32 @@
 from sys import argv
 from scapy.all import *
+from datetime import datetime
 
-def handler(p):
-    if not (p.haslayer(Dot11ProbeReq)):
-        return
-    rssi = p[RadioTap].dBm_AntSignal
-    src_mac = p[Dot11].addr2
-    ap_mac = p[Dot11].addr2
-    info = f"rssi={rssi:2}dBm, src={src_mac}, ap={ap_mac}"
-    if p.haslayer(Dot11ProbeReq):
-        print(f"[ProbReq ] {info}")
+def prn(callbacks=[]):
+    def handler(p):
+        if not (p.haslayer(Dot11ProbeReq)):
+            return
+        time = datetime.fromtimestamp(p.time)
+        rssi = p[RadioTap].dBm_AntSignal
+        src_mac = p[Dot11].addr2
+        ap_mac = p[Dot11].addr2
+        for callback in callbacks:
+            callback(time, rssi, src_mac, ap_mac)
+    return handler
 
-if __name__ == "__main__":
-    if len(sys.argv) <= 1:
+def main():
+    if len(argv) <= 1:
         addrs = socket.if_nameindex()
         print(f'{len(addrs)} nets')
         for k, v in addrs:
             print(f' > {k}: {v}')
     else:
-        sniff(iface=argv[1], prn=handler, monitor=True)
+        with open('probe_req.csv', 'w') as fp:
+            fp.write('time,rssi,src,ap\n')
+            sniff(iface=argv[1], prn=prn(callbacks=[
+                lambda time, rssi, src_mac, ap_mac: print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', sep='\t'),
+                lambda time, rssi, src_mac, ap_mac: fp.write(f'{time},{rssi},{src_mac},{ap_mac}\n')
+            ]), monitor=True)
+
+if __name__ == "__main__":
+    main()
