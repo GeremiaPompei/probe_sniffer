@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from sys import argv
 from scapy.all import *
 from datetime import datetime
@@ -21,9 +23,14 @@ def main():
         for k, v in addrs:
             print(f' > {k}: {v}')
     else:
-        with open('probe_req.csv', 'w') as fp:
+        iface = argv[1]
+        now = datetime.now().strftime('%Y%m%d_%H%M%S')
+        dir = Path('scan')
+        if not dir.exists():
+            dir.mkdir()
+        with open(dir / f'probereq_{now}.csv', 'w') as fp:
             fp.write('time,rssi,src,ap\n')
-            sniff(iface=argv[1], prn=prn(callbacks=[
+            sniff(iface=iface, prn=prn(callbacks=[
                 lambda time, rssi, src_mac, ap_mac: print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', sep='\t'),
                 lambda time, rssi, src_mac, ap_mac: fp.write(f'{time},{rssi},{src_mac},{ap_mac}\n')
             ]), monitor=True)

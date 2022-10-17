@@ -1,10 +1,16 @@
 # Probe request sniffing
 
-*REMEMBER*: disassociate connected wifi before running test with monitor mode.
-For mac OS commands to enable it are:
+*REMEMBER*: disassociate connected wifi before running test with monitor mode:
+- macOS
 ```
 airport -z                              # to disconnect from current wifi connections
-airport NET_INTERFACE_NAME sniff 11     # to enable the monitor mode
+airport $NET_INTERFACE_NAME sniff 11    # to enable the monitor mode
+```
+- linux (*script/linux_monitor_mode.sh*)
+```
+sudo ifconfig $NET_INTERFACE_NAME down          # switch-off net card
+sudo iwconfig $NET_INTERFACE_NAME mode monitor  # switch net card in monitor mode
+sudo ifconfig $NET_INTERFACE_NAME up            # switch-on net card
 ```
 
 ## tcpdump
@@ -38,14 +44,14 @@ Scapy is a library used to debug networks. This provides many ways to analyse pa
 
 To install packages
 ```
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 ```
 Commands are:
 ```
-python scapy_sniff.py
+sudo python sniff.py
 ```
 to list local interface that can be used to sniff
 ``` 
-python scapy_sniff.py NET_INTERFACE_NAME
+sudo python sniff.py NET_INTERFACE_NAME
 ```
 to sniff probe requests. Remember to enable the monitor mode on selected NET_INTERFACE_NAME.
