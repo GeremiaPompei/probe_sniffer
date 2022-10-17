@@ -4,6 +4,15 @@ from sys import argv
 from scapy.all import *
 from datetime import datetime
 
+def printer(time, rssi, src_mac, ap_mac):
+    print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', sep='\t')
+
+def file_writer(fp):
+    def callback(time, rssi, src_mac, ap_mac):
+        fp.write(f'{time},{rssi},{src_mac},{ap_mac}\n')
+        fp.flush()
+    return callback
+
 def prn(callbacks=[]):
     def handler(p):
         if not (p.haslayer(Dot11ProbeReq)):
@@ -31,8 +40,8 @@ def main():
         with open(dir / f'probereq_{now}.csv', 'w') as fp:
             fp.write('time,rssi,src,ap\n')
             sniff(iface=iface, prn=prn(callbacks=[
-                lambda time, rssi, src_mac, ap_mac: print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', sep='\t'),
-                lambda time, rssi, src_mac, ap_mac: fp.write(f'{time},{rssi},{src_mac},{ap_mac}\n')
+                printer,
+                file_writer(fp=fp)
             ]), monitor=True)
 
 if __name__ == "__main__":
