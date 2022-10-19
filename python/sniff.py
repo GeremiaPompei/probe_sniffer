@@ -20,7 +20,7 @@ def prn(callbacks=[]):
         time = datetime.fromtimestamp(p.time)
         rssi = p[RadioTap].dBm_AntSignal
         src_mac = p[Dot11].addr2
-        ap_mac = p[Dot11].addr2
+        ap_mac = p[Dot11].addr1
         for callback in callbacks:
             callback(time, rssi, src_mac, ap_mac)
     return handler
