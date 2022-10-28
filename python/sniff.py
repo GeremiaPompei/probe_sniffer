@@ -21,7 +21,10 @@ def prn(callbacks=[]):
         rssi = p[RadioTap].dBm_AntSignal
         src_mac = p[Dot11].addr2
         ap_mac = p[Dot11].addr1
-        ssid = p[Dot11].info.decode("utf-8") 
+        try:
+            ssid = p[Dot11].info.decode("utf-8") 
+        except Exception:
+            ssid = ''
         for callback in callbacks:
             callback(time, rssi, src_mac, ap_mac, ssid)
     return handler
