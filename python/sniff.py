@@ -4,12 +4,12 @@ from sys import argv
 from scapy.all import *
 from datetime import datetime
 
-def printer(time, rssi, src_mac, ap_mac, ssid):
-    print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', f'ssid: {ssid}', sep='\t')
+def printer(time, rssi, src_mac, ap_mac, ssid, randomized):
+    print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', f'randomized: {randomized}', f'ssid: {ssid}', sep='\t')
 
 def file_writer(fp):
-    def callback(time, rssi, src_mac, ap_mac, ssid):
-        fp.write(f'{time},{rssi},{src_mac},{ap_mac},{ssid}\n')
+    def callback(time, rssi, src_mac, ap_mac, ssid, randomized):
+        fp.write(f'{time},{rssi},{src_mac},{ap_mac},{randomized},{ssid}\n')
         fp.flush()
     return callback
 
@@ -25,8 +25,9 @@ def prn(callbacks=[]):
             ssid = p[Dot11].info.decode("utf-8") 
         except Exception:
             ssid = ''
+        randomized = src_mac[1] in ['2', '6', 'a', 'e']
         for callback in callbacks:
-            callback(time, rssi, src_mac, ap_mac, ssid)
+            callback(time, rssi, src_mac, ap_mac, ssid, randomized)
     return handler
 
 def main():
@@ -42,11 +43,16 @@ def main():
         if not dir.exists():
             dir.mkdir()
         with open(dir / f'probereq_{now}.csv', 'w') as fp:
-            fp.write('time,rssi,src,ap,ssid\n')
-            sniff(iface=iface, prn=prn(callbacks=[
-                printer,
-                file_writer(fp=fp)
-            ]), monitor=True)
+            fp.write('time,rssi,src,ap,randomized,ssid\n')
+            sniff(
+                iface=iface, 
+                prn=prn(callbacks=[
+                    printer,
+                    file_writer(fp=fp)
+                ]),
+                monitor=True,
+                store=0
+            )
 
 if __name__ == "__main__":
     main()
