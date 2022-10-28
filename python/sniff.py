@@ -4,12 +4,12 @@ from sys import argv
 from scapy.all import *
 from datetime import datetime
 
-def printer(time, rssi, src_mac, ap_mac):
-    print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', sep='\t')
+def printer(time, rssi, src_mac, ap_mac, ssid):
+    print(f'time: {time}', f'rssi: {rssi:2}dBm', f'src: {src_mac}', f'ap: {ap_mac}', f'ssid: {ssid}', sep='\t')
 
 def file_writer(fp):
-    def callback(time, rssi, src_mac, ap_mac):
-        fp.write(f'{time},{rssi},{src_mac},{ap_mac}\n')
+    def callback(time, rssi, src_mac, ap_mac, ssid):
+        fp.write(f'{time},{rssi},{src_mac},{ap_mac},{ssid}\n')
         fp.flush()
     return callback
 
@@ -21,8 +21,9 @@ def prn(callbacks=[]):
         rssi = p[RadioTap].dBm_AntSignal
         src_mac = p[Dot11].addr2
         ap_mac = p[Dot11].addr1
+        ssid = p[Dot11].info.decode("utf-8") 
         for callback in callbacks:
-            callback(time, rssi, src_mac, ap_mac)
+            callback(time, rssi, src_mac, ap_mac, ssid)
     return handler
 
 def main():
@@ -38,7 +39,7 @@ def main():
         if not dir.exists():
             dir.mkdir()
         with open(dir / f'probereq_{now}.csv', 'w') as fp:
-            fp.write('time,rssi,src,ap\n')
+            fp.write('time,rssi,src,ap,ssid\n')
             sniff(iface=iface, prn=prn(callbacks=[
                 printer,
                 file_writer(fp=fp)
